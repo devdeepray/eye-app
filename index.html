@@ -10,8 +10,19 @@
         var currenteye = "left"
         var leftscore = 0
         var rightscore = 0
+        var correctsincewrong = 0
 
         function onLoad() {
+            callibrationSize = 0
+            imgwidthconv = 1.0
+            correctcount = 0
+            wrongcount = 0
+            imgDir = ""
+            level = 2
+            correctsincewrong = 0
+            currenteye = "left"
+            leftscore = 0
+            rightscore = 0
             document.getElementById("content").innerHTML = document.getElementById("landing").innerHTML
         }
 
@@ -56,30 +67,39 @@
 
         function onCallibrated() {
             callibrationSize = document.getElementById("callibrationSize").value
-            // 300px is calibration chart. 24 divisions. Per division: 300 / 24
-            // Credit card size is 53.98mm.
-            // mm to pixel conversion: (mm) * (300 / 24) * (callibrationSize / 53.98)
-            imgwidthconv = (300.0 / 24.0) * (callibrationSize / 53.98)
+            // 800px is calibration chart. 24 divisions. Per division: 800 / 24
+            // Credit card size is 85.6mm.
+            // mm to pixel conversion: (mm) * (800 / 24) * (callibrationSize / 85.6)
+            imgwidthconv = (800.0 / 24.0) * (callibrationSize / 85.6)
             insertAndExecute("content", document.getElementById("modeselection").innerHTML)
         }
 
         function hotvSelection() {
             imgdir = "hotv"
-            startTest()
+            startingTest()
         }
 
         function picsSelection() {
             imgdir = "pics"
-            startTest()
+            startingTest()
+        }
+
+        function startingTest() {
+            insertAndExecute("content", document.getElementById("startingtest").innerHTML)
+            othereye = "left"
+            if (currenteye == "left") {
+                othereye = "right"
+            }
+            document.getElementById("testeye").innerHTML = "<h1>Starting the test for the " + currenteye + " eye. <br>Please cover the " + othereye + " with a patch. </h1>"
         }
 
         function startTest() {
-            level = 1
+            level = 2
             correctcount = 0
             wrongcount = 0
 
             insertAndExecute("content", document.getElementById("testing").innerHTML)
-            document.getElementById("testeye").innerHTML =  "Testing " + currenteye + " eye"
+            document.getElementById("testeye").innerHTML =  "Testing " + currenteye + " eye."
             nextImage()
         }
 
@@ -91,7 +111,7 @@
             if (currenteye == "left") {
                 leftscore = level
                 currenteye = "right"
-                startTest()
+                startingTest()
             } else {
                 rightscore = level
                 endTest()
@@ -129,12 +149,15 @@
 
         function correctChoice() {
             correctcount = correctcount + 1
-            if (wrongcount == 0 && correctcount == 3) {
-                level = level + 1
+            correctsincewrong = correctsincewrong + 1
+
+            if (correctsincewrong == 6) {
+                wrongcount = 0
                 correctcount = 0
-            } else if (wrongcount > 1 && correctcount == 3) {
-                endOrNextTest()
-                return
+                level = level + 1
+            } else if (correctcount == 3) {
+                correctcount = 0
+                level = level + 1
             }
 
             if (level > 9) {
@@ -146,12 +169,25 @@
             nextImage()
         }
 
+        function unreliableTest() {
+            insertAndExecute("content", document.getElementById("unreliabletest").innerHTML)
+        }
+
         function wrongChoice() {
-            if (wrongcount < 3) {
+            wrongcount = wrongcount + 1
+            if (wrongcount == 1) {
                 level = level - 1
-                wrongcount = wrongcount + 1
                 correctcount = 0
-            } else {
+                correctsincewrong = 0
+            } else if (wrongcount == 2) {
+                if (correctsincewrong < 3) {
+                    unreliableTest()
+                    return
+                } else {
+                    endOrNextTest()
+                    return
+                }
+            } else if (wrongcount > 2) {
                 unreliableTest()
                 return
             }
@@ -195,12 +231,13 @@
                 Eye test
             </h1>
             <p>
-            Place a credit card aligned to the left of the callibration diagram and enter the size as measured from the callibration scale.
-            If the size measured from the callibration scale is too small (less than 5), please zoom out for a more accurate callibration.
+            Measure the long edge of a credit card by placing one of it's short edge aligned to the left of the callibration scale and
+            note the nearest marker from the right edge of the credit card.
+            If the size measured from the callibration scale is too small (less than 5), please zoom out for a valid callibration.
             </p><br>
-            <img src="media/callibration.svg" alt="Callibration chart" width=300px> <br>
+            <img src="media/callibration.svg" alt="Callibration chart" width=800px> <br>
         
-            Callibrated size:<br>
+            Enter the callibration number from the callibration scale in the box below:<br>
             <form onsubmit="onCallibrated()">
             <input type="number" min="5" max="24" value="5" step="1" id="callibrationSize" required>
             <br><br>
@@ -233,7 +270,46 @@
         <div id="rightresult"></div> <br>
     </template>
 
+    <template id="unreliabletest">
+        <h1>
+            The test is unreliable. Please try again.
+        </h1>
+        <form>
+            <input type="button" value="Try again" onclick="onLoad()">
+        </form>
+    </template>
+
+    <template id="startingtest">
+        
+        <h2>Important: Instructions</h2>
+        <ul>
+            <li>
+                Keep the device 4 meters from the child. Please measure with tape as approximating this might result in inaccuracies.
+            </li>
+            <li>
+                Have the child’s wear his glasses unless doctor specifically asked to test without them.
+            </li>
+            <li>
+                Create an eye patch for the child to cover the eye not being tested. Ensure the child is not peeking.
+            </li>
+            <li>
+                Increase device screen brightness to maximum.
+            </li>
+        </ul>
+
+        <br>
+        <div id="testeye"></div>
+        <br>
+        
+        <form>
+            <input type="button" value="Continue" onclick="startTest()">
+        </form>
+    </template>
+
+
+
     <body onload="onLoad()">
+
     <div id="content">
     </div>
     </body>
