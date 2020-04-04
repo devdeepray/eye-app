@@ -29,23 +29,23 @@
         function levelToImgSize(level) {
             mmwidth = 0
             if (level == 1) {
-                mmwidth = 58.2
-            } else if (level == 2) {
                 mmwidth = 29.1
+            } else if (level == 2) {
+                mmwidth = 14.55
             } else if (level == 3) {
-                mmwidth = 18.4
+                mmwidth = 9.2
             } else if (level == 4) {
-                mmwidth = 14.61
+                mmwidth = 7.305
             } else if (level == 5) {
-                mmwidth = 11.61
+                mmwidth = 5.805
             } else if (level == 6) {
-                mmwidth = 9.22
+                mmwidth = 4.61
             } else if (level == 7) {
-                mmwidth = 7.32
+                mmwidth = 3.66
             } else if (level == 8) {
-                mmwidth = 5.82
+                mmwidth = 2.91
             } else if (level == 9) {
-                mmwidth = 4.62
+                mmwidth = 2.31
             }
             return Math.floor(mmwidth * imgwidthconv)
         }
@@ -90,7 +90,7 @@
             if (currenteye == "left") {
                 othereye = "right"
             }
-            document.getElementById("testeye").innerHTML = "<h1>Starting the test for the " + currenteye + " eye. <br>Please cover the " + othereye + " with a patch. </h1>"
+            document.getElementById("testeye").innerHTML = "<h1>Starting the test for the " + currenteye + " eye. <br>Please cover the " + othereye + " eye with a patch. </h1>"
         }
 
         function startTest() {
@@ -103,17 +103,32 @@
             nextImage()
         }
 
+        var last_image = 1;
+
         function nextImage() {
-            document.getElementById("testimage").innerHTML = "<img src=" + imgdir + "/image" + (Math.floor(Math.random() * 4) + 1).toString() + ".png width=" + levelToImgSize(level) + "px>"
+            var new_image = last_image
+            while  (new_image == last_image) {
+                new_image = (Math.floor(Math.random() * 4) + 1)
+            }
+            last_image = new_image
+            document.getElementById("testimage").innerHTML = "<img src=" + imgdir + "/image" + new_image.toString() + ".png width=" + levelToImgSize(level) + "px>"
         }
 
         function endOrNextTest() {
             if (currenteye == "left") {
-                leftscore = level
+                leftscore = level - 1
+                if (leftscore == 0) {
+                    unreliableTest()
+                    return
+                }
                 currenteye = "right"
                 startingTest()
             } else {
-                rightscore = level
+                rightscore = level - 1
+                if (rightscore == 0) {
+                    unreliableTest()
+                    return
+                }
                 endTest()
             }
         }
@@ -161,7 +176,6 @@
             }
 
             if (level > 9) {
-                level = 9
                 endOrNextTest()
                 return
             }
@@ -201,24 +215,33 @@
         }
     </script>
     <template id="modeselection">
-        <div>
+        <div style="text-align: center;">
             <h1>
                 Mode selection
             </h1>
+            <br>
             <p>
                 Select pictures or text for testing.
             </p>
-            <div style="width:600px">
-                <div style="width:250px; display: inline-block; float left;">
+            <br>
+            <div style="width:800px; display: inline-block;">
+                <div style="width:350px; float: left;">
                     <img src="media/selectorhotv.png" alt="HOTV selection" width=100%>
-                    <form onsubmit="hotvSelection()">
-                    <input type="submit">
+                </div>
+                <div style="width: 350px; float:right;">
+                    <img src="media/selectorpics.png" alt="Pictures selection" width=100%>
+                </div>
+            </div>
+            <br>
+            <div style="width:800px; display: inline-block;">
+                <div style="width:350px;  float: left;">
+                    <form>
+                    <input onclick="hotvSelection()" type="button" value="HOTV mode" style="background-color:darkslategrey; border: none; color:white; padding: 15px 32px; text-align: center; text-decoration: none; font-size: 16px;">
                     </form>
                 </div>
-                <div style="width: 250px; display: inline-block; float:right;">
-                    <img src="media/selectorpics.png" alt="Pictures selection" width=100%>
-                    <form onsubmit="picsSelection()">
-                    <input type="submit">
+                <div style="width: 350px; float: right;">
+                    <form>
+                    <input onclick="picsSelection()" type="button" value="Picture mode" style="background-color:darkslategrey; border: none; color:white; padding: 15px 32px; text-align: center; text-decoration: none; font-size: 16px;">
                     </form>
                 </div>
             </div>
@@ -226,36 +249,45 @@
     </template>
 
     <template id="landing">
-        <div>
-            <h1>
+        <div style="text-align: center;">
+            <h1 style="display: inline-block;">
                 Eye test
             </h1>
-            <p>
-            Measure the long edge of a credit card by placing one of it's short edge aligned to the left of the callibration scale and
-            note the nearest marker from the right edge of the credit card.
-            If the size measured from the callibration scale is too small (less than 5), please zoom out for a valid callibration.
-            </p><br>
-            <img src="media/callibration.svg" alt="Callibration chart" width=800px> <br>
-        
-            Enter the callibration number from the callibration scale in the box below:<br>
-            <form onsubmit="onCallibrated()">
-            <input type="number" min="5" max="24" value="5" step="1" id="callibrationSize" required>
-            <br><br>
-            <input type="submit">
-            </form>
+            <br>
+            <div style="width: 800px; display: inline-block;">
+                <p>
+                Measure the long edge of a credit card by placing one of it's short edge aligned to the left of the callibration scale and
+                note the nearest marker from the right edge of the credit card.
+                If the size measured from the callibration scale is too small (less than 5), please zoom out for a valid callibration.
+                </p><br>
+                <img src="media/callibration.svg" alt="Callibration chart" width=800px> <br>
+            
+                Enter the callibration number from the callibration scale in the box below:<br>
+                <form onsubmit="onCallibrated()">
+                <input type="number" min="5" max="24" value="5" step="1" id="callibrationSize" required>
+                <br><br>
+                <input type="submit" style="background-color:darkslategrey; border: none; color:white; padding: 15px 32px; text-align: center; text-decoration: none; font-size: 16px;">
+                </form>
+            </div>
         </div>
     </template>
 
     <template id="testing">
-        <div id="testimage">
+        <div style="text-align: center;">
+            <div id="testimage" style="margin-top: 100px; display: inline-block;">
 
-        </div>
-        <form>
-            <input type="button" value="Correct" onclick="correctChoice()">
-            <input type="button" value="Wrong" onclick="wrongChoice()">
-        </form>
-        <div id="testeye">
-            
+            </div>
+            <br>
+            <div style="margin-top: 100px; display:inline-block">
+
+                <form >
+                    <input type="button" value="Correct" onclick="correctChoice()" style="float:left; background-color: #4CAF50; border: none; color:white; padding: 15px 32px; text-align: center; text-decoration: none; font-size: 16px;">
+                    <input type="button" value="Wrong" onclick="wrongChoice()" style="float:right; background-color: #AF4C50; border: none; color:white; padding: 15px 32px; text-align: center; text-decoration: none; font-size: 16px;">
+                </form>
+            </div>
+            <div id="testeye">
+                
+            </div>
         </div>
     </template>
 
@@ -275,35 +307,38 @@
             The test is unreliable. Please try again.
         </h1>
         <form>
-            <input type="button" value="Try again" onclick="onLoad()">
+            <input type="button" value="Try again" onclick="onLoad()" style="background-color:darkslategrey; border: none; color:white; padding: 15px 32px; text-align: center; text-decoration: none; font-size: 16px;">
         </form>
     </template>
 
     <template id="startingtest">
-        
-        <h2>Important: Instructions</h2>
-        <ul>
-            <li>
-                Keep the device 4 meters from the child. Please measure with tape as approximating this might result in inaccuracies.
-            </li>
-            <li>
-                Have the child wear his glasses unless doctor specifically asked to test without them.
-            </li>
-            <li>
-                Create an eye patch for the child to cover the eye not being tested. Ensure the child is not peeking.
-            </li>
-            <li>
-                Increase device screen brightness to maximum.
-            </li>
-        </ul>
+        <div style="text-align: center;">
+            <div style="display:inline-block;">
+            <h2>Important: Instructions</h2>
+            <ul style="text-align: left;">
+                <li>
+                    Keep the device 2 meters (6.5 feet) from the child. Please measure with tape as approximating this might result in inaccuracies.
+                </li>
+                <li>
+                    Have the child wear his glasses unless doctor specifically asked to test without them.
+                </li>
+                <li>
+                    Create an eye patch for the child to cover the eye not being tested. Ensure the child is not peeking.
+                </li>
+                <li>
+                    Increase device screen brightness to maximum.
+                </li>
+            </ul>
+        </div>
 
-        <br>
-        <div id="testeye"></div>
-        <br>
-        
-        <form>
-            <input type="button" value="Continue" onclick="startTest()">
-        </form>
+            <br>
+            <div id="testeye"></div>
+            <br>
+            
+            <form>
+                <input type="button" value="Continue" onclick="startTest()">
+            </form>
+        </div>
     </template>
 
 
