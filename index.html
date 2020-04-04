@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+    <script type="text/javascript">
+        var callibrationSize = 0
+        var imgwidthconv = 1.0
+        var correctcount = 0
+        var wrongcount = 0
+        var imgDir = ""
+        var level = 2
+        var currenteye = "left"
+        var leftscore = 0
+        var rightscore = 0
+
+        function onLoad() {
+            document.getElementById("content").innerHTML = document.getElementById("landing").innerHTML
+        }
+
+        function levelToImgSize(level) {
+            mmwidth = 0
+            if (level == 1) {
+                mmwidth = 58.2
+            } else if (level == 2) {
+                mmwidth = 29.1
+            } else if (level == 3) {
+                mmwidth = 18.4
+            } else if (level == 4) {
+                mmwidth = 14.61
+            } else if (level == 5) {
+                mmwidth = 11.61
+            } else if (level == 6) {
+                mmwidth = 9.22
+            } else if (level == 7) {
+                mmwidth = 7.32
+            } else if (level == 8) {
+                mmwidth = 5.82
+            } else if (level == 9) {
+                mmwidth = 4.62
+            }
+            return Math.floor(mmwidth * imgwidthconv)
+        }
+
+        function insertAndExecute(id, text) {
+            document.getElementById(id).innerHTML = text;
+            var scripts = Array.prototype.slice.call(document.getElementById(id).getElementsByTagName("script"));
+            for (var i = 0; i < scripts.length; i++) {
+                if (scripts[i].src != "") {
+                    var tag = document.createElement("script");
+                    tag.src = scripts[i].src;
+                    document.getElementsByTagName("head")[0].appendChild(tag);
+                }
+                else {
+                    eval(scripts[i].innerHTML);
+                }
+            }
+        }
+
+        function onCallibrated() {
+            callibrationSize = document.getElementById("callibrationSize").value
+            // 300px is calibration chart. 24 divisions. Per division: 300 / 24
+            // Credit card size is 53.98mm.
+            // mm to pixel conversion: (mm) * (300 / 24) * (callibrationSize / 53.98)
+            imgwidthconv = (300.0 / 24.0) * (callibrationSize / 53.98)
+            insertAndExecute("content", document.getElementById("modeselection").innerHTML)
+        }
+
+        function hotvSelection() {
+            imgdir = "hotv"
+            startTest()
+        }
+
+        function picsSelection() {
+            imgdir = "pics"
+            startTest()
+        }
+
+        function startTest() {
+            level = 1
+            correctcount = 0
+            wrongcount = 0
+
+            insertAndExecute("content", document.getElementById("testing").innerHTML)
+            document.getElementById("testeye").innerHTML =  "Testing " + currenteye + " eye"
+            nextImage()
+        }
+
+        function nextImage() {
+            document.getElementById("testimage").innerHTML = "<img src=" + imgdir + "/image" + (Math.floor(Math.random() * 4) + 1).toString() + ".png width=" + levelToImgSize(level) + "px>"
+        }
+
+        function endOrNextTest() {
+            if (currenteye == "left") {
+                leftscore = level
+                currenteye = "right"
+                startTest()
+            } else {
+                rightscore = level
+                endTest()
+            }
+        }
+
+        function levelToVision(l) {
+            if (l == 1) {
+                return 200
+            } else if (l == 2) {
+                return 100
+            } else if (l == 3) {
+                return 70
+            } else if (l == 4) {
+                return 50
+            } else if (l == 5) {
+                return 40
+            } else if (l == 6) {
+                return 30
+            } else if (l == 7) {
+                return 25
+            } else if (l == 8) {
+                return 20
+            } else {
+                return 15
+            }
+        }
+
+        function endTest() {
+            // Print results.
+            insertAndExecute("content", document.getElementById("result").innerHTML)
+            document.getElementById("leftresult").innerHTML = "20/" + levelToVision(leftscore).toString()
+            document.getElementById("rightresult").innerHTML = "20/" + levelToVision(rightscore).toString()
+        }
+
+        function correctChoice() {
+            correctcount = correctcount + 1
+            if (wrongcount == 0 && correctcount == 3) {
+                level = level + 1
+                correctcount = 0
+            } else if (wrongcount > 0 && correctcount == 3) {
+                endOrNextTest()
+                return
+            }
+
+            if (level > 9) {
+                level = 9
+                endOrNextTest()
+                return
+            }
+
+            nextImage()
+        }
+
+        function wrongChoice() {
+            if (wrongcount < 3) {
+                level = level - 1
+                wrongcount = wrongcount + 1
+                correctcount = 0
+            } else {
+                unreliableTest()
+                return
+            }
+
+            if (level == 0) {
+                unreliableTest()
+                return
+            }
+
+            nextImage()
+        }
+    </script>
+    <template id="modeselection">
+        <div>
+            <h1>
+                Mode selection
+            </h1>
+            <p>
+                Select pictures or text for testing.
+            </p>
+            <div style="width:600px">
+                <div style="width:250px; display: inline-block; float left;">
+                    <img src="media/selectorhotv.png" alt="HOTV selection" width=100%>
+                    <form onsubmit="hotvSelection()">
+                    <input type="submit">
+                    </form>
+                </div>
+                <div style="width: 250px; display: inline-block; float:right;">
+                    <img src="media/selectorpics.png" alt="Pictures selection" width=100%>
+                    <form onsubmit="picsSelection()">
+                    <input type="submit">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="landing">
+        <div>
+            <h1>
+                Eye test
+            </h1>
+            <p>
+            Place a credit card aligned to the left of the callibration diagram and enter the size as measured from the callibration scale.
+            If the size measured from the callibration scale is too small (less than 5), please zoom out for a more accurate callibration.
+            </p><br>
+            <img src="media/callibration.svg" alt="Callibration chart" width=300px> <br>
+        
+            Callibrated size:<br>
+            <form onsubmit="onCallibrated()">
+            <input type="number" min="5" max="24" value="5" step="1" id="callibrationSize" required>
+            <br><br>
+            <input type="submit">
+            </form>
+        </div>
+    </template>
+
+    <template id="testing">
+        <div id="testimage">
+
+        </div>
+        <form>
+            <input type="button" value="Correct" onclick="correctChoice()">
+            <input type="button" value="Wrong" onclick="wrongChoice()">
+        </form>
+        <div id="testeye">
+            
+        </div>
+    </template>
+
+    <template id="result">
+        <h1>
+            Left eye result:
+        </h1> <br>
+        <div id="leftresult"></div> <br>
+        <h1>
+            Right eye result:
+        </h1> <br>
+        <div id="rightresult"></div> <br>
+    </template>
+
+    <body onload="onLoad()">
+    <div id="content">
+    </div>
+    </body>
+</html>
