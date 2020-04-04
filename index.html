@@ -7,9 +7,10 @@
         var wrongcount = 0
         var imgDir = ""
         var level = 2
-        var currenteye = "left"
+        var currenteye = "both"
         var leftscore = 0
         var rightscore = 0
+        var bothscore = 0;
         var correctsincewrong = 0
 
         function onLoad() {
@@ -20,9 +21,10 @@
             imgDir = ""
             level = 2
             correctsincewrong = 0
-            currenteye = "left"
+            currenteye = "both"
             leftscore = 0
             rightscore = 0
+            bothscore = 0
             document.getElementById("content").innerHTML = document.getElementById("landing").innerHTML
         }
 
@@ -90,7 +92,11 @@
             if (currenteye == "left") {
                 othereye = "right"
             }
-            document.getElementById("testeye").innerHTML = "<h1>Starting the test for the " + currenteye + " eye. <br>Please cover the " + othereye + " eye with a patch. </h1>"
+            if (currenteye == "both") {
+                document.getElementById("testeye").innerHTML = "<h1>Starting the test for both eyes. <br>Please read the instructions carefully.</h1>"
+            } else {
+                document.getElementById("testeye").innerHTML = "<h1>Starting the test for the " + currenteye + " eye. <br>Please cover the " + othereye + " eye with a patch. </h1>"
+            }
         }
 
         function startTest() {
@@ -99,7 +105,11 @@
             wrongcount = 0
 
             insertAndExecute("content", document.getElementById("testing").innerHTML)
-            document.getElementById("testeye").innerHTML =  "Testing " + currenteye + " eye."
+            if (currenteye == "both") {
+                document.getElementById("testeye").innerHTML =  "Testing both eyes."
+            } else {
+                document.getElementById("testeye").innerHTML =  "Testing " + currenteye + " eye."
+            }
             nextImage()
         }
 
@@ -115,7 +125,15 @@
         }
 
         function endOrNextTest() {
-            if (currenteye == "left") {
+            if (currenteye == "both") {
+                bothscore = level - 1
+                if (bothscore == 0) {
+                    unreliableTest()
+                    return
+                }
+                currenteye = "left"
+                startingTest()
+            } else if (currenteye == "left") {
                 leftscore = level - 1
                 if (leftscore == 0) {
                     unreliableTest()
@@ -158,6 +176,7 @@
         function endTest() {
             // Print results.
             insertAndExecute("content", document.getElementById("result").innerHTML)
+            document.getElementById("bothresult").innerHTML = "20/" + levelToVision(bothscore).toString()
             document.getElementById("leftresult").innerHTML = "20/" + levelToVision(leftscore).toString()
             document.getElementById("rightresult").innerHTML = "20/" + levelToVision(rightscore).toString()
         }
@@ -293,6 +312,10 @@
 
     <template id="result">
         <h1>
+            Both eyes result:
+        </h1> <br>
+        <div id="bothresult"></div> <br>
+        <h1>
             Left eye result:
         </h1> <br>
         <div id="leftresult"></div> <br>
@@ -332,7 +355,7 @@
         </div>
 
             <br>
-            <div id="testeye"></div>
+                <div id="testeye"></div>
             <br>
             
             <form>
