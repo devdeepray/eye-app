@@ -69,6 +69,10 @@
 
         function onCallibrated() {
             callibrationSize = document.getElementById("callibrationSize").value
+            if (callibrationSize.isNaN() || callibrationSize < 5 || callibrationSize > 24) {
+                onLoad()
+                return
+            }
             // 800px is calibration chart. 24 divisions. Per division: 800 / 24
             // Credit card size is 85.6mm.
             // mm to pixel conversion: (mm) * (800 / 24) * (callibrationSize / 85.6)
