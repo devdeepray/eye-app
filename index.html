@@ -69,7 +69,7 @@
 
         function onCallibrated() {
             callibrationSize = document.getElementById("callibrationSize").value
-            if (isNan(callibrationSize) || callibrationSize < 5 || callibrationSize > 24) {
+            if (isNaN(callibrationSize) || callibrationSize < 5 || callibrationSize > 24) {
                 onLoad()
                 return
             }
