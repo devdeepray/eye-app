@@ -13,6 +13,8 @@
         var correctcount = 0
         var wrongcount = 0
         var imgDir = ""
+        var imgExt = ""
+        var numImgs = 0
         var level = 2
         var currenteye = "both"
         var leftscore = 0
@@ -26,6 +28,8 @@
             correctcount = 0
             wrongcount = 0
             imgDir = ""
+            imgExt = ""
+            numImgs = 0
             level = 2
             correctsincewrong = 0
             currenteye = "both"
@@ -88,12 +92,16 @@
         }
 
         function hotvSelection() {
-            imgdir = "hotv"
+            imgDir = "hotv"
+            imgExt = ".png"
+            numImgs = 4
             startingTest()
         }
 
         function picsSelection() {
-            imgdir = "pics"
+            imgDir = "pics"
+            imgExt = ".svg"
+            numImgs = 6
             startingTest()
         }
 
@@ -129,10 +137,10 @@
         function nextImage() {
             var new_image = last_image
             while  (new_image == last_image) {
-                new_image = (Math.floor(Math.random() * 4) + 1)
+                new_image = (Math.floor(Math.random() * numImgs) + 1)
             }
             last_image = new_image
-            document.getElementById("testimage").innerHTML = "<img src=" + imgdir + "/image" + new_image.toString() + ".png width=" + levelToImgSize(level) + "px>"
+            document.getElementById("testimage").innerHTML = "<img src=" + imgDir + "/image" + new_image.toString() + imgExt + " width=" + levelToImgSize(level) + "px>"
         }
 
         function endOrNextTest() {
